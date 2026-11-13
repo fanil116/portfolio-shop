@@ -18,7 +18,13 @@ if not SECRET_KEY:
     raise ImproperlyConfigured(msg)
 
 SITE_HOST = getenv("SITE_HOST", "localhost")
-ALLOWED_HOSTS = ["*"]
+# backend — имя сервиса в docker: по нему ходят SSR-запросы Nuxt
+ALLOWED_HOSTS = [
+    host.strip()
+    # `or`: пустая переменная из .env тоже означает «по умолчанию»
+    for host in (getenv("ALLOWED_HOSTS") or f"{SITE_HOST},localhost,127.0.0.1,backend").split(",")
+    if host.strip()
+]
 CSRF_TRUSTED_ORIGINS = [
     origin.strip()
     for origin in getenv("CSRF_TRUSTED_ORIGINS", f"https://{SITE_HOST}").split(",")

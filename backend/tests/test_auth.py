@@ -123,6 +123,10 @@ def test_login_is_throttled(api_client, user):
     assert statuses[-1] == 429
 
 
+def test_unknown_host_is_rejected(client, db):
+    assert client.get("/healthcheck/", HTTP_HOST="evil.example").status_code == 400
+
+
 def test_healthcheck(client, db):
     response = client.get("/healthcheck/")
     assert response.status_code == 200

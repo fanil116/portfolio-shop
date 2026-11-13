@@ -4,6 +4,8 @@ import { $fetch } from 'ofetch';
 
 import AuthModule from '~/repository/modules/auth/auth';
 
+import { CSRF_COOKIE, readBrowserCookie } from '~/utils/cookies';
+
 export interface IApiInstance {
     auth: AuthModule;
 }
@@ -18,11 +20,6 @@ const FORWARDED_HEADERS = [
     'x-forwarded-host',
     'x-forwarded-proto',
 ] as const;
-
-function readCookie(name: string): string | undefined {
-    const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
-    return match?.[1] ? decodeURIComponent(match[1]) : undefined;
-}
 
 export default defineNuxtPlugin(() => {
     const config = useRuntimeConfig();
@@ -41,7 +38,7 @@ export default defineNuxtPlugin(() => {
             // Токен читаем при каждом запросе: Django меняет его после входа
             onRequest({ options: requestOptions }) {
                 const method = (requestOptions.method ?? 'GET').toUpperCase();
-                const token = readCookie('csrftoken');
+                const token = readBrowserCookie(CSRF_COOKIE);
                 if (UNSAFE_METHODS.has(method) && token) {
                     requestOptions.headers.set('X-CSRFToken', token);
                 }

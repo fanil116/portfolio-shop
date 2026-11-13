@@ -4,6 +4,7 @@ x-backend_environment: &backend_environment
     - API_DOCS_ENABLE
     - SECRET_KEY
     - SITE_HOST
+    - ALLOWED_HOSTS
     - CSRF_TRUSTED_ORIGINS
     - COOKIE_SECURE
     - POSTGRES_HOST=${POSTGRES_HOST:-db}

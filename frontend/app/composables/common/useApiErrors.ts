@@ -1,9 +1,26 @@
 import { FetchError } from 'ofetch';
 
-type FieldErrors = Record<string, string[] | string>;
+const CSRF_FAILED_PREFIX = 'CSRF Failed';
 
 /**
- * Превращает ошибку DRF в текст для формы: ошибки полей и non_field_errors.
+ * Собирает все строки из ответа DRF: ошибки полей, non_field_errors, detail,
+ * в том числе вложенные ({ address: { city: ['...'] } }) и списки объектов.
+ */
+function collectMessages(value: unknown): string[] {
+    if (typeof value === 'string') {
+        return [value];
+    }
+    if (Array.isArray(value)) {
+        return value.flatMap(collectMessages);
+    }
+    if (value && typeof value === 'object') {
+        return Object.values(value).flatMap(collectMessages);
+    }
+    return [];
+}
+
+/**
+ * Превращает ошибку запроса к API в текст для формы.
  */
 export function getApiErrorMessage(error: unknown): string {
     if (error instanceof FetchError) {
@@ -11,14 +28,13 @@ export function getApiErrorMessage(error: unknown): string {
             return 'Слишком много попыток. Попробуйте через минуту.';
         }
 
-        const data = error.data as FieldErrors | undefined;
-        if (data && typeof data === 'object') {
-            const messages = Object.values(data).flatMap((value) =>
-                Array.isArray(value) ? value : [value]
-            );
-            if (messages.length) {
-                return messages.join(' ');
-            }
+        const messages = collectMessages(error.data);
+
+        if (messages.some((message) => message.startsWith(CSRF_FAILED_PREFIX))) {
+            return 'Сессия устарела. Обновите страницу и попробуйте снова.';
+        }
+        if (messages.length) {
+            return messages.join(' ');
         }
     }
 
