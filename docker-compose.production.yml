@@ -1,0 +1,63 @@
+# Запуск: docker compose -f docker-compose.yml -f docker-compose.frontend.yml -f docker-compose.production.yml up -d
+services:
+  nginx:
+    container_name: nginx
+    image: portfolio-shop/nginx:${TAG:-latest}
+    build:
+      context: ./nginx
+    restart: always
+    environment:
+      - ENVIRONMENT=production
+      - SITE_HOST
+      - ADMIN_HTPASSWD
+    depends_on:
+      - backend
+      - frontend
+    volumes:
+      - static:/var/www/static/:ro
+      - nuxt:/var/www/nuxt/:ro
+    ports:
+      - 80:80
+
+  backend:
+    restart: always
+    build:
+      context: ./backend
+      args:
+        UV_SYNC_ARGS: "--no-dev"
+    entrypoint: ./entrypoint.production.sh
+    command: >
+      uv run --no-sync gunicorn config.wsgi:application -w ${GUNICORN_WORKERS:-3}
+      --keep-alive 120 -b 0.0.0.0:8000 --access-logfile - --error-logfile -
+    environment:
+      - DEBUG=False
+      - API_DOCS_ENABLE=False
+    volumes:
+      - static:/app/static/:delegated
+
+  celery:
+    restart: always
+
+  celery-beat:
+    restart: always
+
+  db:
+    restart: always
+    volumes:
+      - postgresdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    restart: always
+    volumes:
+      - redisdata:/data
+
+volumes:
+  static:
+  nuxt:
+  postgresdata:
+  redisdata:

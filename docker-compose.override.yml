@@ -1,0 +1,38 @@
+# Локальная разработка: подхватывается docker compose автоматически.
+services:
+  backend:
+    restart: unless-stopped
+    volumes:
+      - /app/.venv # защищает venv контейнера от перезаписи локальной папкой
+      - ./backend/:/app/:cached
+    entrypoint: ./entrypoint.sh
+    command: uv run python manage.py runserver 0.0.0.0:8000
+    ports:
+      - 8000:8000
+
+  celery:
+    volumes:
+      - /app/.venv
+      - ./backend/:/app/:cached
+
+  celery-beat:
+    volumes:
+      - /app/.venv
+      - ./backend/:/app/:cached
+
+  db:
+    restart: unless-stopped
+    volumes:
+      - postgresdata:/var/lib/postgresql/data
+    ports:
+      - 15432:5432
+
+  redis:
+    volumes:
+      - redisdata:/data
+    ports:
+      - 6379:6379
+
+volumes:
+  postgresdata:
+  redisdata:

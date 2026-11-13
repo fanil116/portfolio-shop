@@ -1,0 +1,56 @@
+resolver 127.0.0.11 valid=5s ipv6=off;
+
+# Запросы на чужие домены не обслуживаем
+server {
+    listen 80 default_server;
+    return 444;
+}
+
+server {
+    server_name ${SITE_HOST};
+    listen 80;
+
+    if ($host ~ ^www\.(?<domain>.+)$) {
+        return 301 $scheme://$domain$request_uri;
+    }
+
+    sendfile on;
+    tcp_nodelay on;
+    tcp_nopush on;
+    gzip on;
+    gzip_min_length 1000;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml;
+    client_max_body_size 5M;
+    add_header X-Frame-Options SAMEORIGIN;
+
+    # Статика Django (admin, drf)
+    location /s/ {
+        alias /var/www/static/;
+        expires 365d;
+    }
+
+    # Клиентская сборка Nuxt
+    location /_nuxt/ {
+        alias /var/www/nuxt/;
+        expires 365d;
+    }
+
+    location /api/ {
+        include includes/backend;
+    }
+
+    location /admin/ {
+        auth_basic "Restricted";
+        auth_basic_user_file /etc/nginx/conf.d/admin_htpasswd;
+        client_max_body_size 50M;
+        include includes/backend;
+    }
+
+    location /healthcheck/ {
+        include includes/backend;
+    }
+
+    location / {
+        include includes/frontend;
+    }
+}

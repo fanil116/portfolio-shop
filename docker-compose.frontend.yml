@@ -1,0 +1,18 @@
+services:
+  frontend:
+    container_name: frontend
+    image: portfolio-shop/frontend:${TAG:-latest}
+    restart: always
+    build:
+      context: ./frontend
+    entrypoint: ./entrypoint.production.sh
+    command: node .output/server/index.mjs
+    environment:
+      - NUXT_API_INTERNAL_URL=http://backend:8000
+    depends_on:
+      - backend
+    volumes:
+      - nuxt:/app/nuxt_volume:delegated
+
+volumes:
+  nuxt:
