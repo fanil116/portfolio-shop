@@ -1,0 +1,54 @@
+{
+    "name": "portfolio-shop-frontend",
+    "version": "0.1.0",
+    "description": "Frontend портфолио: витрина, заявки, магазин, личный кабинет",
+    "type": "module",
+    "private": true,
+    "engines": {
+        "node": ">=22.12.0"
+    },
+    "scripts": {
+        "dev": "nuxt dev",
+        "build": "nuxt build",
+        "start": "node .output/server/index.mjs",
+        "postinstall": "nuxt prepare && npm run update:hooks",
+        "update:hooks": "cd .. && node ./frontend/node_modules/simple-git-hooks/cli.js ./frontend/.simple-git-hooks.cjs || exit 0",
+        "el:check": "eslint .",
+        "sl:check": "stylelint \"**/*.{scss,vue}\"",
+        "tsc:check": "vue-tsc -b --noEmit",
+        "lint:check": "npm run el:check && npm run sl:check && npm run format:check",
+        "el:fix": "eslint . --fix",
+        "sl:fix": "stylelint \"**/*.{scss,vue}\" --fix",
+        "lint:fix": "npm run el:fix && npm run sl:fix && npm run format",
+        "format": "prettier --write .",
+        "format:check": "prettier --check ."
+    },
+    "dependencies": {
+        "@pinia/nuxt": "^0.11.3",
+        "nuxt": "4.4.8",
+        "pinia": "^3.0.3",
+        "vue": "3.5.38",
+        "vue-router": "^5.1.0"
+    },
+    "devDependencies": {
+        "@commitlint/cli": "^19.3.0",
+        "@commitlint/config-conventional": "^19.2.2",
+        "@nuxt/eslint": "^1.5.2",
+        "eslint": "^9.30.0",
+        "eslint-config-prettier": "^10.1.2",
+        "eslint-plugin-prettier": "^5.2.6",
+        "eslint-plugin-simple-import-sort": "^13.0.0",
+        "lint-staged": "^15.2.2",
+        "postcss-html": "^1.5.0",
+        "prettier": "^3.5.3",
+        "sass-embedded": "^1.79.4",
+        "simple-git-hooks": "^2.7.0",
+        "stylelint": "^16.10.0",
+        "stylelint-config-standard": "^36.0.1",
+        "stylelint-config-standard-scss": "^13.1.0",
+        "stylelint-order": "^6.0.4",
+        "stylelint-scss": "^6.9.0",
+        "typescript": "^5.9.3",
+        "vue-tsc": "^3.0.6"
+    }
+}

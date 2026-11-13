@@ -1,0 +1,63 @@
+import type { FetchOptions } from 'ofetch';
+
+import { $fetch } from 'ofetch';
+
+import AuthModule from '~/repository/modules/auth/auth';
+
+export interface IApiInstance {
+    auth: AuthModule;
+}
+
+const UNSAFE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+
+// Заголовки входящего запроса, которые SSR пробрасывает в backend
+const FORWARDED_HEADERS = [
+    'cookie',
+    'x-real-ip',
+    'x-forwarded-for',
+    'x-forwarded-host',
+    'x-forwarded-proto',
+] as const;
+
+function readCookie(name: string): string | undefined {
+    const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+    return match?.[1] ? decodeURIComponent(match[1]) : undefined;
+}
+
+export default defineNuxtPlugin(() => {
+    const config = useRuntimeConfig();
+    let options: FetchOptions;
+
+    if (import.meta.server) {
+        // SSR ходит в backend напрямую и представляется от имени пользователя (его cookie)
+        options = {
+            baseURL: config.apiInternalUrl,
+            headers: useRequestHeaders([...FORWARDED_HEADERS]),
+        };
+    } else {
+        options = {
+            baseURL: '/',
+            credentials: 'same-origin',
+            // Токен читаем при каждом запросе: Django меняет его после входа
+            onRequest({ options: requestOptions }) {
+                const method = (requestOptions.method ?? 'GET').toUpperCase();
+                const token = readCookie('csrftoken');
+                if (UNSAFE_METHODS.has(method) && token) {
+                    requestOptions.headers.set('X-CSRFToken', token);
+                }
+            },
+        };
+    }
+
+    const apiFetcher = $fetch.create(options);
+
+    const modules: IApiInstance = {
+        auth: new AuthModule(apiFetcher),
+    };
+
+    return {
+        provide: {
+            fetchData: modules,
+        },
+    };
+});
