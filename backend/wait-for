@@ -1,0 +1,21 @@
+#!/usr/bin/env python
+"""Ждёт, пока Postgres начнёт принимать TCP-подключения (до ~3 минут)."""
+
+import sys
+from os import getenv
+from socket import create_connection
+from time import sleep
+
+HOST = getenv("POSTGRES_HOST", "db")
+PORT = int(getenv("POSTGRES_PORT", "5432"))
+ATTEMPTS = 1800
+
+for _ in range(ATTEMPTS):
+    try:
+        create_connection((HOST, PORT), timeout=1).close()
+        sys.exit(0)
+    except OSError:
+        sleep(0.1)
+
+sys.stderr.write(f"wait-for: {HOST}:{PORT} недоступен\n")
+sys.exit(1)

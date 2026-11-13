@@ -1,0 +1,66 @@
+[project]
+name = "portfolio-shop-backend"
+version = "0.1.0"
+description = "Backend портфолио: API, админка, личный кабинет"
+requires-python = ">=3.13"
+dependencies = [
+    "django==5.2.*",
+    "djangorestframework==3.15.*",
+    "drf-spectacular==0.28.*",
+    "django-filter==25.*",
+    "django-debug-toolbar==5.0.*",
+    "redis>=6.1,<7",
+    "celery==5.4.*",
+    "gunicorn==23.0.*",
+    "psycopg2-binary==2.9.*",
+    "sentry-sdk==2.23.*",
+]
+
+[dependency-groups]
+dev = [
+    "pytest==8.3.*",
+    "pytest-django==4.10.*",
+    "pytest-cov==6.0.*",
+    "ruff==0.11.*",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+src = ["."]
+exclude = [".venv", "**/migrations/**"]
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "ANN002",
+    "ANN003",
+    "ANN401",
+    "ARG001",
+    "ARG002",
+    "COM812",
+    "D100",
+    "D101",
+    "D102",
+    "D103",
+    "D104",
+    "D105",
+    "D106",
+    "D203",
+    "D213",
+    "RUF001",
+    "RUF002",
+    "RUF003",
+    "RUF012",
+    "TID252",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S106", "PLR2004", "ANN", "D"]
+"config/settings.py" = ["S105"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
