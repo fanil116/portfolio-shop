@@ -55,8 +55,15 @@ export const useAuthStore = defineStore('auth', () => {
     }
 
     async function logout(): Promise<void> {
-        await $fetchData.auth.csrf();
-        await $fetchData.auth.logout();
+        try {
+            await $fetchData.auth.csrf();
+            await $fetchData.auth.logout();
+        } catch (error) {
+            // 401/403 — сессия на сервере уже истекла: пользователь фактически вышел
+            if (!(error instanceof FetchError && UNAUTHORIZED_STATUSES.has(error.status ?? 0))) {
+                throw error;
+            }
+        }
         user.value = null;
     }
 

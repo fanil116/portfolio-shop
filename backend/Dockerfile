@@ -30,5 +30,8 @@ RUN mkdir -p /app/static/ /app/media/ && \
 
 WORKDIR /app
 USER appuser
+# UV_NO_SYNC: `uv run` использует уже собранный .venv и не доустанавливает пакеты
+# при старте (иначе в prod-образе с --no-dev подтягивалась бы dev-группа)
 ENV PATH="/app/.venv/bin:${PATH}" \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    UV_NO_SYNC=1

@@ -2,9 +2,12 @@ from typing import Any
 
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
+from django.db import IntegrityError, transaction
 from rest_framework import serializers
 
 from .models import User
+
+EMAIL_TAKEN_MESSAGE = "Пользователь с таким email уже зарегистрирован"
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -24,8 +27,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     def validate_email(self, value: str) -> str:
         email = User.objects.normalize_email(value).lower()
         if User.objects.filter(email__iexact=email).exists():
-            msg = "Пользователь с таким email уже зарегистрирован"
-            raise serializers.ValidationError(msg)
+            raise serializers.ValidationError(EMAIL_TAKEN_MESSAGE)
         return email
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
@@ -33,7 +35,13 @@ class RegisterSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data: dict[str, Any]) -> User:
-        return User.objects.create_user(**validated_data)
+        # Параллельная регистрация с тем же email проходит validate_email у обоих запросов,
+        # поэтому ловим нарушение unique-ограничения и отдаём 400, а не 500
+        try:
+            with transaction.atomic():
+                return User.objects.create_user(**validated_data)
+        except IntegrityError as error:
+            raise serializers.ValidationError({"email": [EMAIL_TAKEN_MESSAGE]}) from error
 
 
 class LoginSerializer(serializers.Serializer):

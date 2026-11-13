@@ -11,8 +11,8 @@ from rest_framework.throttling import BaseThrottle, ScopedRateThrottle
 
 from .serializers import LoginSerializer, RegisterSerializer, UserSerializer
 
-THROTTLED_ACTIONS = frozenset({"login", "register"})
-ANONYMOUS_CSRF_ACTIONS = frozenset({"login", "register"})
+# Анонимные действия входа: ограничены по частоте и требуют CSRF-токен
+ENTRY_ACTIONS = frozenset({"login", "register"})
 
 
 class AuthViewSet(viewsets.GenericViewSet):
@@ -27,7 +27,7 @@ class AuthViewSet(viewsets.GenericViewSet):
         return [AllowAny()]
 
     def get_throttles(self) -> list[BaseThrottle]:
-        if self.action in THROTTLED_ACTIONS:
+        if self.action in ENTRY_ACTIONS:
             return [ScopedRateThrottle()]
         return []
 
@@ -35,7 +35,7 @@ class AuthViewSet(viewsets.GenericViewSet):
         super().initial(request, *args, **kwargs)
         # SessionAuthentication проверяет CSRF только у уже вошедших пользователей,
         # поэтому для анонимных login/register (защита от login CSRF) проверяем явно
-        if self.action in ANONYMOUS_CSRF_ACTIONS:
+        if self.action in ENTRY_ACTIONS:
             SessionAuthentication().enforce_csrf(request)
 
     @extend_schema(request=None, responses={204: None})

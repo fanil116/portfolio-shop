@@ -1,6 +1,8 @@
 import pytest
+from rest_framework.exceptions import ValidationError
 
 from users.models import User
+from users.serializers import RegisterSerializer
 
 from .conftest import PASSWORD, get_csrf_token
 
@@ -56,6 +58,14 @@ def test_register_rejects_duplicate_email(api_client, user):
     )
     assert response.status_code == 400
     assert "email" in response.data
+
+
+def test_register_race_on_same_email_returns_validation_error(user):
+    # Имитирует второй параллельный запрос: validate_email уже пройден, а пользователь создан
+    serializer = RegisterSerializer()
+    with pytest.raises(ValidationError) as exc_info:
+        serializer.create({"email": user.email, "password": PASSWORD})
+    assert "email" in exc_info.value.detail
 
 
 def test_register_rejects_weak_password(api_client):
