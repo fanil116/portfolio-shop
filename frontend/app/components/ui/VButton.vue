@@ -1,4 +1,6 @@
 <script setup lang="ts">
+    import { NuxtLink } from '#components';
+
     import VIcon from '~/components/ui/VIcon.vue';
 
     type Variant = 'primary' | 'warning' | 'light' | 'link';
@@ -15,7 +17,8 @@
         { to: undefined, variant: 'primary', size: 'md', icon: undefined, type: 'button' }
     );
 
-    const tag = computed(() => (props.to ? resolveComponent('NuxtLink') : 'button'));
+    // Ссылка, если есть to, иначе нативная кнопка
+    const tag = computed(() => (props.to ? NuxtLink : 'button'));
 </script>
 
 <template>

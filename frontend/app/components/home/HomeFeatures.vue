@@ -31,13 +31,23 @@
 <style lang="scss" module>
     .HomeFeatures {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
         margin-top: space(6);
         padding: space(4);
         border-radius: radius(lg);
         border: 1px solid color(gray, 100);
 
         @include reset-list;
+
+        // Явная сетка вместо auto-fit: известно, с какой ширины пункты стоят в одну строку
+        @include respond-to(sm) {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        @include respond-to(lg) {
+            grid-auto-flow: column;
+            grid-template-columns: none;
+            grid-auto-columns: minmax(0, 1fr);
+        }
     }
 
     .item {
@@ -46,8 +56,8 @@
         gap: space(4);
         padding: space(4);
 
-        // Разделитель между пунктами — только когда они стоят в одну строку
-        @include respond-to(xl) {
+        // Разделитель между пунктами — с того же брейкпоинта, где они встают в одну строку
+        @include respond-to(lg) {
             & + & {
                 border-left: 1px solid color(gray, 100);
             }

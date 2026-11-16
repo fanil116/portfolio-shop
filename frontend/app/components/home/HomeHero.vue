@@ -11,8 +11,18 @@
     const sides = computed(() => props.block.banners.filter((b) => b.variant === 'side'));
 
     const active = ref(0);
-    const isPaused = ref(false);
+    // Мышь и клавиатурный фокус ставят паузу независимо: уход мыши не снимает паузу,
+    // пока фокус внутри слайдера, иначе слайд с фокусом уехал бы и стал inert
+    const isHovered = ref(false);
+    const hasFocus = ref(false);
+    const isPaused = computed(() => isHovered.value || hasFocus.value);
     let timer: ReturnType<typeof setInterval> | undefined;
+
+    // Переход фокуса между элементами внутри слайдера паузу не снимает
+    function onFocusOut(event: FocusEvent): void {
+        const slider = event.currentTarget as HTMLElement;
+        hasFocus.value = slider.contains(event.relatedTarget as Node | null);
+    }
 
     function goTo(index: number): void {
         active.value = (index + slides.value.length) % slides.value.length;
@@ -38,10 +48,10 @@
             v-if="slides.length"
             :class="$style.slider"
             aria-roledescription="carousel"
-            @mouseenter="isPaused = true"
-            @mouseleave="isPaused = false"
-            @focusin="isPaused = true"
-            @focusout="isPaused = false"
+            @mouseenter="isHovered = true"
+            @mouseleave="isHovered = false"
+            @focusin="hasFocus = true"
+            @focusout="onFocusOut"
         >
             <div
                 :class="$style.track"

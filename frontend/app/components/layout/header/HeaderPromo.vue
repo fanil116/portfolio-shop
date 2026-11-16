@@ -4,10 +4,22 @@
     import VButton from '~/components/ui/VButton.vue';
     import VIcon from '~/components/ui/VIcon.vue';
 
-    defineProps<{ promo: IPromo }>();
+    const props = defineProps<{ promo: IPromo }>();
+
+    // Короткий отпечаток текста акции: новая акция из админки снова видна тем,
+    // кто закрыл предыдущую (djb2 — достаточно для различения, не для безопасности)
+    const promoKey = computed(() => {
+        const text = Object.values(props.promo).join('|');
+        let hash = 5381;
+        for (const char of text) {
+            hash = (hash * 33) ^ char.charCodeAt(0);
+        }
+        return (hash >>> 0).toString(36);
+    });
 
     // Закрытая полоса не возвращается до конца сессии браузера
-    const isClosed = useCookie<boolean>('promo-closed', { default: () => false });
+    const closedKey = useCookie<string | null>('promo-closed', { default: () => null });
+    const isClosed = computed(() => closedKey.value === promoKey.value);
 </script>
 
 <template>
@@ -43,7 +55,7 @@
             type="button"
             :class="$style.close"
             aria-label="Скрыть акцию"
-            @click="isClosed = true"
+            @click="closedKey = promoKey"
         >
             <VIcon
                 name="close"
