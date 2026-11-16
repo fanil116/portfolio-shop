@@ -1,4 +1,5 @@
 <script setup lang="ts">
+    import TheFooter from '~/components/layout/TheFooter.vue';
     import TheHeader from '~/components/layout/TheHeader.vue';
 </script>
 
@@ -8,6 +9,7 @@
         <main :class="$style.main">
             <slot />
         </main>
+        <TheFooter />
     </div>
 </template>
 
@@ -20,6 +22,5 @@
 
     .main {
         flex: 1;
-        padding: 40px 0;
     }
 </style>

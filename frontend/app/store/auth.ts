@@ -93,6 +93,7 @@ export const useAuthStore = defineStore('auth', () => {
         fetchMe,
         ensureLoaded,
         markGuest,
+        ensureCsrf,
         login,
         register,
         updateProfile,

@@ -3,11 +3,15 @@ import type { FetchOptions } from 'ofetch';
 import { $fetch } from 'ofetch';
 
 import AuthModule from '~/repository/modules/auth/auth';
+import CatalogModule from '~/repository/modules/catalog/catalog';
+import ContentModule from '~/repository/modules/content/content';
 
 import { CSRF_COOKIE, readBrowserCookie } from '~/utils/cookies';
 
 export interface IApiInstance {
     auth: AuthModule;
+    catalog: CatalogModule;
+    content: ContentModule;
 }
 
 const UNSAFE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
@@ -50,6 +54,8 @@ export default defineNuxtPlugin(() => {
 
     const modules: IApiInstance = {
         auth: new AuthModule(apiFetcher),
+        catalog: new CatalogModule(apiFetcher),
+        content: new ContentModule(apiFetcher),
     };
 
     return {
