@@ -13,6 +13,17 @@ def _clear_cache():
     cache.clear()
 
 
+@pytest.fixture(autouse=True)
+def _media_root(settings, tmp_path):
+    # Загруженные в тестах картинки не попадают в рабочую папку media
+    settings.MEDIA_ROOT = tmp_path / "media"
+
+
+@pytest.fixture
+def admin_user(db) -> User:
+    return User.objects.create_superuser(email="admin@example.com", password=PASSWORD)
+
+
 @pytest.fixture
 def api_client() -> APIClient:
     # enforce_csrf_checks=True: проверяем CSRF так же, как в браузере
