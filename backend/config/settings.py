@@ -5,6 +5,8 @@ from pathlib import Path
 from sys import argv
 
 from django.core.exceptions import ImproperlyConfigured
+from django.http import HttpRequest
+from django.urls import reverse_lazy
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -34,6 +36,9 @@ CSRF_TRUSTED_ORIGINS = [
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 INSTALLED_APPS = [
+    # Тема админки должна идти до django.contrib.admin, чтобы переопределить её шаблоны
+    "unfold",
+    "unfold.contrib.filters",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -45,9 +50,13 @@ INSTALLED_APPS = [
     "rest_framework",
     "django_filters",
     "drf_spectacular",
+    "solo",
     # Apps
     "common.apps.CommonConfig",
     "users.apps.UsersConfig",
+    "catalog.apps.CatalogConfig",
+    "content.apps.ContentConfig",
+    "newsletter.apps.NewsletterConfig",
 ]
 
 MIDDLEWARE = [
@@ -64,9 +73,9 @@ if DEBUG:
     INSTALLED_APPS.append("debug_toolbar")
     MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")
 
-    def show_toolbar_callback(_: object) -> bool:
-        """Показ debug toolbar в DEBUG без привязки к INTERNAL_IPS (docker)."""
-        return DEBUG
+    def show_toolbar_callback(request: HttpRequest) -> bool:
+        """Debug toolbar в DEBUG без привязки к INTERNAL_IPS (docker); в админке не мешает."""
+        return DEBUG and not request.path.startswith("/admin/")
 
     DEBUG_TOOLBAR_CONFIG = {"SHOW_TOOLBAR_CALLBACK": "config.settings.show_toolbar_callback"}
 
@@ -134,6 +143,7 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_THROTTLE_RATES": {
         "auth": "10/min",
+        "newsletter": "5/min",
     },
     # IP клиента для throttling берётся из X-Forwarded-For, который дописывает nginx
     "NUM_PROXIES": int(getenv("NUM_PROXIES", "1")),
@@ -202,3 +212,80 @@ if environ.get("SENTRY_DSN"):
         traces_sample_rate=0.1,
         integrations=[DjangoIntegration(), CeleryIntegration()],
     )
+
+# Админка (django-unfold): боковое меню по разделам
+UNFOLD = {
+    "SITE_TITLE": "Clicon — админка",
+    "SITE_HEADER": "Clicon",
+    "SITE_SUBHEADER": "Управление магазином",
+    "SITE_URL": "/",
+    "SITE_SYMBOL": "storefront",
+    "SHOW_HISTORY": True,
+    "SHOW_VIEW_ON_SITE": True,
+    "SIDEBAR": {
+        "show_search": True,
+        "show_all_applications": False,
+        "navigation": [
+            {
+                "title": "Главная страница",
+                "items": [
+                    {
+                        "title": "Блоки главной",
+                        "icon": "view_agenda",
+                        "link": reverse_lazy("admin:content_homeblock_changelist"),
+                    },
+                    {
+                        "title": "Настройки сайта",
+                        "icon": "tune",
+                        "link": reverse_lazy("admin:content_sitesettings_change"),
+                    },
+                    {
+                        "title": "Меню",
+                        "icon": "menu",
+                        "link": reverse_lazy("admin:content_menu_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": "Каталог",
+                "items": [
+                    {
+                        "title": "Товары",
+                        "icon": "inventory_2",
+                        "link": reverse_lazy("admin:catalog_product_changelist"),
+                    },
+                    {
+                        "title": "Категории",
+                        "icon": "category",
+                        "link": reverse_lazy("admin:catalog_category_changelist"),
+                    },
+                    {
+                        "title": "Бренды",
+                        "icon": "sell",
+                        "link": reverse_lazy("admin:catalog_brand_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": "Пользователи и рассылка",
+                "items": [
+                    {
+                        "title": "Пользователи",
+                        "icon": "person",
+                        "link": reverse_lazy("admin:users_user_changelist"),
+                    },
+                    {
+                        "title": "Группы",
+                        "icon": "group",
+                        "link": reverse_lazy("admin:auth_group_changelist"),
+                    },
+                    {
+                        "title": "Подписчики",
+                        "icon": "mail",
+                        "link": reverse_lazy("admin:newsletter_subscriber_changelist"),
+                    },
+                ],
+            },
+        ],
+    },
+}

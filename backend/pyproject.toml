@@ -14,6 +14,9 @@ dependencies = [
     "gunicorn==23.0.*",
     "psycopg2-binary==2.9.*",
     "sentry-sdk==2.23.*",
+    "django-unfold==0.110.*",
+    "django-solo==2.7.*",
+    "pillow==13.0.*",
 ]
 
 [dependency-groups]
