@@ -33,6 +33,7 @@ export default defineNuxtConfig({
             '/api': { target: `${apiInternalUrl}/api`, changeOrigin: false },
             '/admin': { target: `${apiInternalUrl}/admin`, changeOrigin: false },
             '/s': { target: `${apiInternalUrl}/s`, changeOrigin: false },
+            '/m': { target: `${apiInternalUrl}/m`, changeOrigin: false },
         },
     },
 

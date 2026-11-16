@@ -36,7 +36,7 @@ htmlcov/
 /backend/static/
 /backend/media/
 db.sqlite3
-celerybeat-schedule
+celerybeat-schedule*
 
 # Local certificates
 /.certs/

@@ -15,6 +15,7 @@ services:
       - frontend
     volumes:
       - static:/var/www/static/:ro
+      - media:/var/www/media/:ro
       - nuxt:/var/www/nuxt/:ro
     ports:
       - 80:80
@@ -34,6 +35,8 @@ services:
       - API_DOCS_ENABLE=False
     volumes:
       - static:/app/static/:delegated
+      # Загруженные через админку картинки (MEDIA_ROOT), раздаёт nginx
+      - media:/app/media/
 
   celery:
     restart: always
@@ -58,6 +61,7 @@ services:
 
 volumes:
   static:
+  media:
   nuxt:
   postgresdata:
   redisdata:

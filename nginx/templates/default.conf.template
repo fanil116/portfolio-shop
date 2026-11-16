@@ -29,6 +29,12 @@ server {
         expires 365d;
     }
 
+    # Картинки, загруженные через админку (MEDIA_URL)
+    location /m/ {
+        alias /var/www/media/;
+        expires 30d;
+    }
+
     # Клиентская сборка Nuxt
     location /_nuxt/ {
         alias /var/www/nuxt/;

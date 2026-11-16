@@ -6,7 +6,7 @@ COMPOSE = docker compose
 COMPOSE_PROD = docker compose -f docker-compose.yml -f docker-compose.frontend.yml -f docker-compose.production.yml
 
 .PHONY: help env build up down logs exec_backend shell migrate makemigrations \
-	createsuperuser test lint lint_fix front_install front_dev front_lint prod_up prod_down
+	createsuperuser seed test lint lint_fix front_install front_dev front_lint prod_up prod_down
 
 .DEFAULT_GOAL := help
 
@@ -24,6 +24,7 @@ help:
 	@echo "  make migrate          - Применить миграции"
 	@echo "  make makemigrations   - Создать миграции"
 	@echo "  make createsuperuser  - Создать администратора"
+	@echo "  make seed             - Демо-каталог и блоки главной (если главная пустая)"
 	@echo "  make test             - pytest в контейнере backend"
 	@echo "  make lint             - ruff check + ruff format --check"
 	@echo "  make lint_fix         - ruff check --fix + ruff format"
@@ -66,6 +67,9 @@ makemigrations:
 
 createsuperuser:
 	$(COMPOSE) exec backend uv run python manage.py createsuperuser
+
+seed:
+	$(COMPOSE) exec backend uv run python manage.py seed_demo
 
 test:
 	$(COMPOSE) exec backend uv run pytest
