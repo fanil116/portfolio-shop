@@ -6,9 +6,7 @@ from common.healthcheck_view import healthcheck_view
 
 from .routers import router
 
-admin.site.site_header = "Portfolio Shop"
-admin.site.site_title = "Portfolio Shop"
-
+# Заголовки админки задаются в settings.UNFOLD
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include(router.urls)),
@@ -17,8 +15,11 @@ urlpatterns = [
 
 if settings.DEBUG:
     import debug_toolbar
+    from django.conf.urls.static import static
 
     urlpatterns += [path("api/__debug__/", include(debug_toolbar.urls))]
+    # В production медиа отдаёт nginx
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.API_DOCS_ENABLE:
     from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
