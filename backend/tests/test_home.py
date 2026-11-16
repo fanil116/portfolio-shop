@@ -5,7 +5,7 @@ import pytest
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
-from content.models import Banner, Feature, HomeBlock, HomeBlockCategory
+from content.models import Banner, Feature, HomeBlock, HomeBlockCategory, HomeBlockProduct
 
 from .factories import make_block, make_brand, make_category, make_product
 
@@ -127,3 +127,21 @@ def test_category_cannot_be_its_own_ancestor():
     parent.parent = child
     with pytest.raises(ValidationError):
         parent.full_clean()
+
+
+def test_same_product_cannot_be_added_twice_to_block_column():
+    product = make_product()
+    block = make_block(Kind.DEALS, [product])
+    duplicate = HomeBlockProduct(block=block, product=product, group="")
+    with pytest.raises(ValidationError):
+        duplicate.full_clean()
+    # В другую колонку того же блока — можно
+    HomeBlockProduct(block=block, product=product, group="Хиты", sort=1).full_clean()
+
+
+def test_same_category_cannot_be_added_twice_to_block():
+    category = make_category()
+    block = HomeBlock.objects.create(kind=Kind.CATEGORIES)
+    HomeBlockCategory.objects.create(block=block, category=category)
+    with pytest.raises(ValidationError):
+        HomeBlockCategory(block=block, category=category).full_clean()

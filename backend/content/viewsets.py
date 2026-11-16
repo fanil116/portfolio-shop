@@ -13,7 +13,6 @@ from .models import (
     HomeBlockCategory,
     HomeBlockProduct,
     Menu,
-    MenuItem,
     SiteSettings,
 )
 from .serializers import HomeBlockSerializer, MenuSerializer, SiteSettingsSerializer
@@ -104,9 +103,7 @@ class SiteViewSet(viewsets.ViewSet):
     )
     def list(self, request: Request) -> Response:
         settings = SiteSettings.get_solo()
-        menus = Menu.objects.filter(is_active=True).prefetch_related(
-            Prefetch("items", queryset=MenuItem.objects.all())
-        )
+        menus = Menu.objects.filter(is_active=True).prefetch_related("items")
         return Response(
             {
                 "settings": SiteSettingsSerializer(settings).data,

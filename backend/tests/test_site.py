@@ -1,4 +1,7 @@
+from unittest.mock import patch
+
 import pytest
+from django.db import IntegrityError
 
 from content.models import Menu, MenuItem, SiteSettings, SocialLink
 from newsletter.models import Subscriber
@@ -72,3 +75,9 @@ def test_subscribe_validates_email(api_client):
 def test_subscribe_is_throttled(api_client):
     statuses = [subscribe(api_client, f"u{i}@example.com").status_code for i in range(6)]
     assert statuses[-1] == 429
+
+
+def test_subscribe_race_returns_204(api_client):
+    # Параллельный запрос успел создать запись между SELECT и INSERT
+    with patch.object(Subscriber.objects, "get_or_create", side_effect=IntegrityError):
+        assert subscribe(api_client, "race@example.com").status_code == 204

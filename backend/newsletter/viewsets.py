@@ -1,3 +1,6 @@
+import contextlib
+
+from django.db import IntegrityError, transaction
 from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action
@@ -25,6 +28,8 @@ class NewsletterViewSet(EnforceCsrfMixin, viewsets.GenericViewSet):
     def subscribe(self, request: Request) -> Response:
         serializer = SubscribeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        # Повторная подписка — не ошибка; ответ одинаковый, чтобы не раскрывать, кто подписан
-        Subscriber.objects.get_or_create(email=serializer.validated_data["email"].lower())
+        # Повторная подписка — не ошибка; ответ одинаковый, чтобы не раскрывать, кто подписан.
+        # IntegrityError — параллельный запрос с тем же email успел создать запись: цель достигнута
+        with contextlib.suppress(IntegrityError), transaction.atomic():
+            Subscriber.objects.get_or_create(email=serializer.validated_data["email"].lower())
         return Response(status=status.HTTP_204_NO_CONTENT)

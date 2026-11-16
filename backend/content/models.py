@@ -140,6 +140,12 @@ class HomeBlockProduct(SortableModel):
     class Meta(SortableModel.Meta):
         verbose_name = "Товар блока"
         verbose_name_plural = "Товары блока"
+        # Один товар может стоять в разных колонках, но не дважды в одной
+        constraints = (
+            models.UniqueConstraint(
+                fields=("block", "product", "group"), name="uniq_home_block_product_group"
+            ),
+        )
 
     def __str__(self) -> str:
         return str(self.product)
@@ -152,6 +158,9 @@ class HomeBlockCategory(SortableModel):
     class Meta(SortableModel.Meta):
         verbose_name = "Категория блока"
         verbose_name_plural = "Категории блока"
+        constraints = (
+            models.UniqueConstraint(fields=("block", "category"), name="uniq_home_block_category"),
+        )
 
     def __str__(self) -> str:
         return str(self.category)
