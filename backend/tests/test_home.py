@@ -145,3 +145,34 @@ def test_same_category_cannot_be_added_twice_to_block():
     HomeBlockCategory.objects.create(block=block, category=category)
     with pytest.raises(ValidationError):
         HomeBlockCategory(block=block, category=category).full_clean()
+
+
+def test_deals_returns_only_visible_products(client):
+    make_block(Kind.DEALS, [make_product() for _ in range(12)])
+    assert len(get_blocks(client)[0]["products"]) == 9
+
+
+def test_columns_return_three_products_per_group(client):
+    block = HomeBlock.objects.create(kind=Kind.PRODUCT_COLUMNS)
+    for index in range(5):
+        for group in ("Хиты", "Новинки"):
+            HomeBlockProduct.objects.create(
+                block=block, product=make_product(), group=group, sort=index
+            )
+    groups = [p["group"] for p in get_blocks(client)[0]["products"]]
+    assert groups.count("Хиты") == 3
+    assert groups.count("Новинки") == 3
+
+
+def test_tabs_keep_products_for_every_tab(client):
+    phones, tv = make_category(), make_category()
+    # Первые 10 товаров — телефоны, телевизоры дальше: обрезка «первые 8» их бы потеряла
+    products = [make_product(category=phones) for _ in range(10)]
+    products += [make_product(category=tv) for _ in range(3)]
+    block = make_block(Kind.PRODUCT_TABS, products)
+    HomeBlockCategory.objects.create(block=block, category=phones, sort=0)
+    HomeBlockCategory.objects.create(block=block, category=tv, sort=1)
+
+    cards = get_blocks(client)[0]["products"]
+    assert sum(phones.pk in c["category_ids"] for c in cards) == 8
+    assert sum(tv.pk in c["category_ids"] for c in cards) == 3

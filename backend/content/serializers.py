@@ -5,10 +5,46 @@ from catalog.serializers import (
     BrandSerializer,
     CategorySerializer,
     ProductCardSerializer,
+    category_with_ancestors,
     image_url,
 )
 
 from .models import Banner, Feature, HomeBlock, HomeBlockProduct, Menu, MenuItem, SiteSettings
+
+# Сколько товаров блока реально выводит главная (совпадает с константами компонентов фронта):
+# лучшие предложения — 1 крупный + 8 в сетке, табы — 8 на таб, колонки — 3 в колонке
+DEALS_LIMIT = 9
+TAB_LIMIT = 8
+COLUMN_LIMIT = 3
+
+
+def visible_block_products(
+    block: HomeBlock, parents: dict[int, int | None]
+) -> list[HomeBlockProduct]:
+    """Товары блока, которые попадут на страницу: лишнее не раздувает ответ и SSR-payload."""
+    items = list(block.block_products.all())
+    if block.kind == HomeBlock.Kind.DEALS:
+        return items[:DEALS_LIMIT]
+    if block.kind == HomeBlock.Kind.PRODUCT_COLUMNS:
+        per_group: dict[str, int] = {}
+        visible = []
+        for item in items:
+            per_group[item.group] = per_group.get(item.group, 0) + 1
+            if per_group[item.group] <= COLUMN_LIMIT:
+                visible.append(item)
+        return visible
+    if block.kind == HomeBlock.Kind.PRODUCT_TABS:
+        # Первые TAB_LIMIT для таба «Все» и для каждого таба-категории, порядок сохраняется
+        keep = {item.pk for item in items[:TAB_LIMIT]}
+        for tab in block.block_categories.all():
+            matching = [
+                item
+                for item in items
+                if tab.category_id in category_with_ancestors(item.product.category_id, parents)
+            ]
+            keep.update(item.pk for item in matching[:TAB_LIMIT])
+        return [item for item in items if item.pk in keep]
+    return items
 
 
 class BannerSerializer(serializers.ModelSerializer):
@@ -81,9 +117,8 @@ class HomeBlockSerializer(serializers.ModelSerializer):
         return None
 
     def get_products(self, obj: HomeBlock) -> list[dict]:
-        return BlockProductSerializer(
-            obj.block_products.all(), many=True, context=self.context
-        ).data
+        items = visible_block_products(obj, self.context.get("category_parents", {}))
+        return BlockProductSerializer(items, many=True, context=self.context).data
 
     def get_categories(self, obj: HomeBlock) -> list[dict]:
         categories = [item.category for item in obj.block_categories.all()]

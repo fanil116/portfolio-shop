@@ -4,6 +4,16 @@ from rest_framework import serializers
 from .models import Brand, Category, Product
 
 
+def category_with_ancestors(category_id: int, parents: dict[int, int | None]) -> list[int]:
+    """Категория и все её предки. Карта id → parent_id собирается одним запросом во view."""
+    ids: list[int] = []
+    current: int | None = category_id
+    while current is not None and current not in ids:
+        ids.append(current)
+        current = parents.get(current)
+    return ids
+
+
 def image_url(image: ImageFieldFile | None) -> str | None:
     # Относительный URL: фронт и медиа живут на одном домене за nginx
     return image.url if image else None
@@ -72,11 +82,4 @@ class ProductCardSerializer(serializers.ModelSerializer):
         return image_url(obj.image)
 
     def get_category_ids(self, obj: Product) -> list[int]:
-        # Карта id → parent_id собирается одним запросом во view, здесь только обход
-        parents: dict[int, int | None] = self.context.get("category_parents", {})
-        ids: list[int] = []
-        current: int | None = obj.category_id
-        while current is not None and current not in ids:
-            ids.append(current)
-            current = parents.get(current)
-        return ids
+        return category_with_ancestors(obj.category_id, self.context.get("category_parents", {}))
