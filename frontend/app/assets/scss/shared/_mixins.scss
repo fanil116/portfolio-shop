@@ -1,0 +1,127 @@
+@use 'sass:map';
+@use 'variables' as *;
+@use 'functions' as *;
+
+/// Mobile-first медиазапрос: @include respond-to(lg) { ... }
+@mixin respond-to($name) {
+    @media (min-width: breakpoint($name)) {
+        @content;
+    }
+}
+
+/// Стили только ниже брейкпоинта: @include respond-below(md) { ... }
+@mixin respond-below($name) {
+    @media (max-width: breakpoint($name) - 0.02px) {
+        @content;
+    }
+}
+
+/// Hover только на устройствах с курсором — на тач-экранах не «залипает»
+@mixin hover {
+    @media (hover: hover) and (pointer: fine) {
+        &:hover {
+            @content;
+        }
+    }
+}
+
+/// Стиль текста из карты $text-styles; насыщенность можно переопределить
+@mixin typography($style, $weight: null) {
+    $props: map.get($text-styles, $style);
+
+    @if not $props {
+        @error 'Неизвестный стиль текста «#{$style}». Доступно: #{map.keys($text-styles)}';
+    }
+
+    font-size: rem(map.get($props, size));
+    font-weight: $weight or map.get($props, weight);
+    line-height: map.get($props, line);
+
+    @if map.has-key($props, tracking) {
+        letter-spacing: map.get($props, tracking);
+    }
+
+    @if map.has-key($props, transform) {
+        text-transform: map.get($props, transform);
+    }
+}
+
+@mixin container {
+    width: 100%;
+    max-width: $container-width + $container-gutter * 2;
+    margin-right: auto;
+    margin-left: auto;
+    padding-right: $container-gutter-mobile;
+    padding-left: $container-gutter-mobile;
+
+    @include respond-to(md) {
+        padding-right: $container-gutter;
+        padding-left: $container-gutter;
+    }
+}
+
+/// Обрезка текста до $lines строк с многоточием
+@mixin line-clamp($lines) {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: $lines;
+}
+
+@mixin visually-hidden {
+    position: absolute;
+    overflow: hidden;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+/// Заметный фокус только при навигации с клавиатуры
+@mixin focus-ring($color: color(secondary)) {
+    &:focus-visible {
+        outline: 2px solid $color;
+        outline-offset: 2px;
+    }
+}
+
+/// Сброс стилей нативной кнопки. Подключать первой строкой правила:
+/// миксин обнуляет background и padding, заданные выше него
+@mixin reset-button {
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    user-select: none;
+}
+
+@mixin reset-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/// Горизонтальная лента со scroll-snap без видимого скроллбара
+@mixin snap-scroller($gap) {
+    display: grid;
+    grid-auto-columns: var(--snap-item-width, 200px);
+    grid-auto-flow: column;
+    gap: $gap;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    > * {
+        scroll-snap-align: start;
+    }
+}

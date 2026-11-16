@@ -92,22 +92,27 @@
 
 <style lang="scss" module>
     .email {
-        margin: 0;
-        color: $color-muted;
+        text-align: center;
+        color: color(gray, 600);
     }
 
     .saved {
-        margin: 0;
-        font-size: 14px;
-        color: $color-accent;
+        color: color(success);
+
+        @include typography(body-sm);
     }
 
     .logout {
-        padding: 0;
-        border: none;
-        background: none;
-        font: inherit;
-        color: $color-muted;
-        cursor: pointer;
+        @include reset-button;
+
+        align-self: center;
+        color: color(gray, 600);
+
+        @include typography(body-sm, 500);
+        @include focus-ring;
+
+        @include hover {
+            color: color(danger);
+        }
     }
 </style>

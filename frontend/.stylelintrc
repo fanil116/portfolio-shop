@@ -58,10 +58,21 @@
             "transition",
             "cursor"
         ],
-        "function-no-unknown": [
+        "function-no-unknown": null,
+        "scss/function-no-unknown": [
             true,
             {
-                "ignoreFunctions": ["v-bind"]
+                "ignoreFunctions": [
+                    "v-bind",
+                    "color",
+                    "space",
+                    "radius",
+                    "z",
+                    "breakpoint",
+                    "rem",
+                    "fluid",
+                    "/^-/"
+                ]
             }
         ]
     }

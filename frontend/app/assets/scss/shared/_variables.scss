@@ -1,11 +1,145 @@
-$color-bg: #0f1115;
-$color-surface: #181b22;
-$color-border: #2a2f3a;
-$color-text: #e8eaf0;
-$color-muted: #9aa3b5;
-$color-accent: #7c5cff;
-$color-error: #ff6b6b;
-$radius: 12px;
-$container-width: 1200px;
-$gutter: 16px;
-$transition: 0.2s ease;
+// =============================================================================
+// Дизайн-токены (из Style Guide макета Clicon).
+// Значения не используются напрямую в компонентах — только через функции
+// color(), space(), z(), radius() и миксины typography(), respond-to().
+// =============================================================================
+
+// Палитры: оттенок 500 — базовый цвет палитры
+$palettes: (
+    gray: (
+        0: #fff,
+        50: #f2f4f5,
+        100: #e4e7e9,
+        200: #c9cfd2,
+        300: #adb7bc,
+        400: #929fa5,
+        500: #77878f,
+        600: #5f6c72,
+        700: #475156,
+        800: #303639,
+        900: #191c1f,
+    ),
+    primary: (
+        50: #fff3eb,
+        100: #ffe7d6,
+        200: #ffcead,
+        300: #ffb685,
+        400: #ff9d5c,
+        500: #fa8232,
+        600: #de732d,
+        700: #99501f,
+    ),
+    secondary: (
+        50: #eaf6fe,
+        100: #d5edfd,
+        500: #2da5f3,
+        600: #2484c2,
+        700: #1b6392,
+        800: #124261,
+    ),
+    success: (
+        50: #eaf7e9,
+        500: #2db224,
+    ),
+    warning: (
+        300: #f3de6d,
+        400: #efd33d,
+        500: #ebc80c,
+    ),
+    danger: (
+        50: #fdeeee,
+        500: #ee5858,
+    ),
+);
+
+// Шкала отступов: шаг 4px, ключ = множитель
+$space-step: 4px;
+
+// Брейкпоинты (min-width). xl — ширина контента макета 1320px + поля
+$breakpoints: (
+    sm: 576px,
+    md: 768px,
+    lg: 1024px,
+    xl: 1368px,
+);
+$container-width: 1320px;
+$container-gutter: 24px;
+$container-gutter-mobile: 16px;
+$radii: (
+    xs: 2px,
+    sm: 3px,
+    md: 4px,
+    lg: 6px,
+    round: 100px,
+);
+
+// Слои по возрастанию
+$z-layers: (
+    base: 1,
+    badge: 2,
+    overlay: 3,
+    dropdown: 10,
+    header: 20,
+    modal: 30,
+);
+$font-family-base:
+    'Public Sans',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+
+// Типографика: размер / межстрочный / насыщенность по умолчанию
+$text-styles: (
+    display-03: (
+        size: 48px,
+        line: 56px,
+        weight: 600,
+    ),
+    heading-01: (
+        size: 32px,
+        line: 40px,
+        weight: 600,
+    ),
+    heading-03: (
+        size: 24px,
+        line: 32px,
+        weight: 600,
+    ),
+    body-xl: (
+        size: 20px,
+        line: 28px,
+        weight: 400,
+    ),
+    body-lg: (
+        size: 18px,
+        line: 24px,
+        weight: 400,
+    ),
+    body-md: (
+        size: 16px,
+        line: 24px,
+        weight: 400,
+    ),
+    body-sm: (
+        size: 14px,
+        line: 20px,
+        weight: 400,
+    ),
+    body-tiny: (
+        size: 12px,
+        line: 16px,
+        weight: 400,
+    ),
+    caption: (
+        size: 14px,
+        line: 20px,
+        weight: 700,
+        tracking: 0.168px,
+        transform: uppercase,
+    ),
+);
+$transition-fast: 0.15s ease;
+$transition-base: 0.25s ease;
+$shadow-dropdown: 0 8px 40px rgb(0 0 0 / 12%);
+$shadow-card-hover: 0 8px 24px rgb(25 28 31 / 8%);

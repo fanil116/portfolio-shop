@@ -14,8 +14,16 @@ export default defineNuxtConfig({
     app: {
         head: {
             htmlAttrs: { lang: 'ru' },
-            title: 'Portfolio',
+            title: 'Clicon — магазин электроники',
             meta: [{ name: 'viewport', content: 'width=device-width, initial-scale=1' }],
+            link: [
+                { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+                { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
+                {
+                    rel: 'stylesheet',
+                    href: 'https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap',
+                },
+            ],
         },
     },
 
@@ -48,7 +56,8 @@ export default defineNuxtConfig({
         css: {
             preprocessorOptions: {
                 scss: {
-                    additionalData: '@use "~/assets/scss/shared/variables" as *;',
+                    // Токены, функции и миксины доступны в каждом <style lang="scss">
+                    additionalData: '@use "~/assets/scss/shared" as *;',
                 },
             },
         },

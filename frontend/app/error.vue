@@ -32,25 +32,29 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        gap: space(6);
         min-height: 100vh;
-        padding: $gutter;
+        padding: space(4);
         text-align: center;
     }
 
     .code {
-        margin: 0;
-        font-size: 64px;
+        font-size: fluid(64px, 120px);
         font-weight: 700;
-        color: $color-accent;
+        line-height: 1;
+        color: color(primary);
     }
 
     .button {
-        padding: 12px 24px;
-        border-radius: $radius;
-        border: none;
-        background-color: $color-accent;
-        font: inherit;
-        color: #fff;
-        cursor: pointer;
+        @include reset-button;
+
+        padding: 0 space(6);
+        border-radius: radius(xs);
+        background-color: color(primary);
+        line-height: 48px;
+        color: color(gray, 0);
+
+        @include typography(caption);
+        @include focus-ring;
     }
 </style>

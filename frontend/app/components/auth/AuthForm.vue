@@ -43,52 +43,69 @@
     .AuthForm {
         display: flex;
         flex-direction: column;
-        gap: 16px;
+        gap: space(4);
         width: 100%;
-        max-width: 400px;
-        margin: 0 auto;
-        padding: 32px;
-        border-radius: $radius;
-        border: 1px solid $color-border;
-        background-color: $color-surface;
+        max-width: 424px;
+        margin: space(10) auto;
+        padding: space(8);
+        border-radius: radius(sm);
+        border: 1px solid color(gray, 100);
+        background-color: color(gray, 0);
+        box-shadow: $shadow-dropdown;
 
         label {
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            font-size: 14px;
-            color: $color-muted;
+            gap: space(2);
+            color: color(gray, 900);
+
+            @include typography(body-sm);
         }
 
         input {
-            padding: 10px 12px;
-            border-radius: 8px;
-            border: 1px solid $color-border;
-            background-color: $color-bg;
+            height: 44px;
+            padding: 0 space(4);
+            border-radius: radius(xs);
+            border: 1px solid color(gray, 100);
+            background-color: color(gray, 0);
             font: inherit;
-            color: $color-text;
+            color: color(gray, 900);
+            transition: border-color $transition-fast;
+
+            &:focus {
+                border-color: color(primary);
+                outline: none;
+            }
         }
     }
 
     .title {
-        margin: 0 0 8px;
-        font-size: 24px;
+        text-align: center;
+
+        @include typography(body-xl, 600);
     }
 
     .error {
-        margin: 0;
-        font-size: 14px;
-        color: $color-error;
+        color: color(danger);
+
+        @include typography(body-sm);
     }
 
     .submit {
-        padding: 12px;
-        border-radius: 8px;
-        border: none;
-        background-color: $color-accent;
-        font: inherit;
-        color: #fff;
-        cursor: pointer;
+        @include reset-button;
+
+        height: 48px;
+        border-radius: radius(xs);
+        background-color: color(primary);
+        color: color(gray, 0);
+        transition: background-color $transition-fast;
+
+        @include typography(caption);
+        @include focus-ring;
+
+        @include hover {
+            background-color: color(primary, 600);
+        }
 
         &:disabled {
             opacity: 0.6;

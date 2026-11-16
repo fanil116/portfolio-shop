@@ -1,0 +1,56 @@
+@use 'sass:map';
+@use 'sass:math';
+@use 'sass:meta';
+@use 'variables' as *;
+
+// Достаёт значение из вложенной карты токенов или останавливает сборку
+// с понятной ошибкой — опечатка в имени токена не превратится в пустое значение.
+@function -token($map, $key, $kind) {
+    @if not map.has-key($map, $key) {
+        @error 'Неизвестный #{$kind} «#{$key}». Доступно: #{map.keys($map)}';
+    }
+
+    @return map.get($map, $key);
+}
+
+/// Цвет палитры: color(primary), color(gray, 600)
+@function color($palette, $shade: 500) {
+    @return -token(-token($palettes, $palette, 'палитра'), $shade, 'оттенок #{$palette}');
+}
+
+/// Отступ по шкале: space(4) = 16px, space(1.5) = 6px
+@function space($multiplier) {
+    @return $space-step * $multiplier;
+}
+
+@function radius($name) {
+    @return -token($radii, $name, 'радиус');
+}
+
+@function z($layer) {
+    @return -token($z-layers, $layer, 'слой');
+}
+
+@function breakpoint($name) {
+    @return -token($breakpoints, $name, 'брейкпоинт');
+}
+
+/// px → rem (база 16px)
+@function rem($px) {
+    @return math.div($px, 16px) * 1rem;
+}
+
+/// Плавное значение между брейкпоинтами: fluid(32px, 48px) растёт от md до xl
+/// и упирается в границы. Возвращает clamp() с линейной интерполяцией по vw.
+@function fluid($min, $max, $from: md, $to: xl) {
+    @if meta.type-of($min) != 'number' or math.unit($min) != 'px' {
+        @error 'fluid() ожидает px, получено #{$min}';
+    }
+
+    $from-width: breakpoint($from);
+    $to-width: breakpoint($to);
+    $slope: math.div($max - $min, $to-width - $from-width);
+    $intercept: $min - $slope * $from-width;
+
+    @return clamp(#{rem($min)}, #{rem($intercept)} + #{$slope * 100vw}, #{rem($max)});
+}
